@@ -96,29 +96,47 @@ opcshow/
 
 ```mermaid
 flowchart TD
-    subgraph 前端展示与交互 (Vue 3 SPA)
-        A[访客/管理员入口] --> B{路由选择}
-        B -->|首页| C[个人总览 & 可拖拽卡片]
-        B -->|工作| D[三级知识库 & 在线简历]
-        B -->|生活| E[朋友圈/恋爱/旅拍地图/运动/游戏]
-        B -->|娱乐| F[音乐盒/电影打分/百宝箱]
-        B -->|我的| G[友链/留言弹幕/时间轴/自媒体]
-        B -->|后台管理| H[数据统计 & 审核面板]
+    subgraph FE["前端展示与交互 (Vue 3 SPA)"]
+        A["访客/管理员入口"] --> B{"路由选择"}
+        B -->|首页| C["个人总览 & 可拖拽卡片"]
+        B -->|工作| D["三级知识库 & 在线简历"]
+        B -->|生活| E["朋友圈/恋爱/旅拍地图/运动/游戏"]
+        B -->|娱乐| F["音乐盒/电影打分/百宝箱"]
+        B -->|我的| G["友链/留言弹幕/时间轴/自媒体"]
+        B -->|后台管理| H["数据统计 & 审核面板"]
     end
 
-    subgraph 后端 API 服务 (FastAPI Server)
-        C & D & E & F & G & H -->|RESTful JSON| I[FastAPI 路由分发]
-        I --> J[Core / Admin Router]
-        I --> K[Knowledge / Life / Fun / Social Router]
-        I --> L[AI Service Router]
+    subgraph BE["后端 API 服务 (FastAPI Server)"]
+        I["FastAPI 路由分发"]
+        J["Core / Admin Router"]
+        K["Knowledge / Life / Fun / Social Router"]
+        L["AI Service Router"]
     end
 
-    subgraph 智能引擎与持久层 (Data & AI)
-        J & K --> M[(SQLite 3 数据库)]
-        L --> N{AI 模式分支}
-        N -->|本地规则引擎| O[STAR 润色 / 敏感词风控]
-        N -->|预留 LLM 协议| P[OpenAI 兼容 REST 大模型]
+    subgraph DATA["智能引擎与持久层 (Data & AI)"]
+        M[("SQLite 3 数据库")]
+        N{"AI 模式分支"}
+        O["STAR 润色 / 敏感词风控"]
+        P["OpenAI 兼容 REST 大模型"]
     end
+
+    C -->|RESTful JSON| I
+    D -->|RESTful JSON| I
+    E -->|RESTful JSON| I
+    F -->|RESTful JSON| I
+    G -->|RESTful JSON| I
+    H -->|RESTful JSON| I
+
+    I --> J
+    I --> K
+    I --> L
+
+    J --> M
+    K --> M
+    L --> N
+
+    N -->|本地规则引擎| O
+    N -->|预留 LLM 协议| P
 ```
 
 ### 1. 💼 工作与知识管理模块 (Work & KB)

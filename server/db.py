@@ -8,7 +8,15 @@ import sqlite3
 from datetime import datetime, timedelta
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "opcshow.db")
+
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/opcshow.db"
+    seed_db = os.path.join(BASE_DIR, "opcshow.db")
+    if not os.path.exists(DB_PATH) and os.path.exists(seed_db):
+        import shutil
+        shutil.copyfile(seed_db, DB_PATH)
+else:
+    DB_PATH = os.path.join(BASE_DIR, "opcshow.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
