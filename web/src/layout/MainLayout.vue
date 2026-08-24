@@ -126,10 +126,10 @@ const tabbar = [
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'is-dark-shell': activeGroup === 'home' }">
     <!-- ======== PC 顶部导航栏 ======== -->
-    <header class="pc-topnav">
-      <div class="topnav-container">
+    <header class="pc-topnav" :class="{ 'is-dark-nav': activeGroup === 'home' }">
+      <div class="topnav-container" :class="{ 'is-dark-container': activeGroup === 'home' }">
         <!-- 品牌 / Logo -->
         <div class="brand" @click="go('/')">
           <span class="brand-logo"><i></i></span>
@@ -196,7 +196,7 @@ const tabbar = [
     </header>
 
     <!-- ======== 移动端顶栏 ======== -->
-    <header class="mobile-top">
+    <header class="mobile-top" :class="{ 'is-dark-nav': activeGroup === 'home' }">
       <button class="hamburger" @click="mobileNavOpen = true" aria-label="菜单">
         <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
       </button>
@@ -230,7 +230,7 @@ const tabbar = [
     </transition>
 
     <!-- ======== 主内容 ======== -->
-    <main class="main-area">
+    <main class="main-area" :class="{ 'is-home-main': activeGroup === 'home' }">
       <router-view v-slot="{ Component }">
         <transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -268,6 +268,27 @@ const tabbar = [
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line-2);
   box-shadow: 0 4px 20px -6px rgba(35, 38, 43, 0.05);
+  transition: all 0.3s ease;
+}
+
+.pc-topnav.is-dark-nav {
+  background: rgba(5, 6, 8, 0.82);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px -6px rgba(0, 0, 0, 0.5);
+}
+.pc-topnav.is-dark-nav .brand-text strong {
+  color: #f5efe6;
+}
+.pc-topnav.is-dark-nav .nav-item-btn {
+  color: rgba(255, 255, 255, 0.72);
+}
+.pc-topnav.is-dark-nav .nav-item-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.pc-topnav.is-dark-nav .nav-item-btn.on {
+  background: #539dfd;
+  color: #050608;
 }
 
 .topnav-container {
@@ -517,6 +538,14 @@ const tabbar = [
   border-bottom: 1px solid var(--line-2);
   padding: 10px 16px; align-items: center; justify-content: space-between;
 }
+.mobile-top.is-dark-nav {
+  background: rgba(5, 6, 8, 0.88);
+  color: #f5efe6;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.mobile-top.is-dark-nav .hamburger svg {
+  stroke: #f5efe6;
+}
 .mobile-top strong { font-size: 16px; }
 .hamburger { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
 .hamburger svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
@@ -545,11 +574,29 @@ const tabbar = [
 .tabbar a svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar a.on { color: var(--accent); font-weight: 600; }
 
+.app-shell.is-dark-shell {
+  background-color: #050608 !important;
+  color: #f4f0e8;
+}
+
+.topnav-container.is-dark-container {
+  max-width: 1440px !important;
+}
+
+.main-area.is-home-main {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: #050608 !important;
+}
+
 @media (max-width: 860px) {
   .pc-topnav { display: none; }
   .mobile-top { display: flex; }
   .tabbar { display: flex; }
   .main-area { padding-top: 66px !important; }
+  .main-area.is-home-main { padding-top: 0 !important; padding-left: 0 !important; padding-right: 0 !important; }
 }
 </style>
 
