@@ -1,9 +1,11 @@
 import os
 import sys
 
-# Ensure server module path is accessible for Python serverless runtime
-server_dir = os.path.join(os.path.dirname(__file__), "..", "server")
-if server_dir not in sys.path:
-    sys.path.insert(0, server_dir)
+# Compute absolute path to server directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "server"))
+
+if SERVER_DIR not in sys.path:
+    sys.path.insert(0, SERVER_DIR)
 
 from main import app

@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Production output
+dist/
+web/dist/
+.vercel/
+
+# DB & Local Files
+*.db
+*.log
+.DS_Store

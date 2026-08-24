@@ -9,15 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vitejs/plugin-vue": "^5.1.2",
     "echarts": "^5.5.1",
     "sortablejs": "^1.15.6",
     "three": "^0.166.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
     "vue": "^3.4.38",
     "vue-router": "^4.4.3"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.1.2",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.2"
   }
 }
