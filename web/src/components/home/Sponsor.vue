@@ -55,7 +55,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="sponsor"
     data-section
-    class="sponsor relative min-h-[100svh] overflow-hidden px-4 py-24 md:px-8 md:py-32"
+    class="sponsor relative min-h-[100svh] overflow-hidden px-6 py-24 md:px-12 md:py-32 lg:px-16"
   >
     <div class="sponsor-aurora pointer-events-none absolute inset-0" />
     <div class="sponsor-grid pointer-events-none absolute inset-0 opacity-[0.18]" />

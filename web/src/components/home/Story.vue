@@ -160,7 +160,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="story"
     data-section
-    class="relative flex min-h-[100svh] items-center overflow-hidden px-4 py-20 md:px-8 md:py-24"
+    class="relative flex min-h-[100svh] items-center overflow-hidden px-6 py-20 md:px-12 md:py-24 lg:px-16"
   >
     <!-- 光亮色块遮罩 -->
     <div class="pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[80%] bg-[radial-gradient(ellipse_at_center,rgba(215,163,91,0.16),transparent_62%)]" />

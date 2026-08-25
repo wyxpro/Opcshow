@@ -15,7 +15,7 @@ const bottomRow = [...galleryImgs].reverse().concat([...galleryImgs].reverse())
 </script>
 
 <template>
-  <section id="studio" data-section class="relative overflow-hidden px-4 py-20 md:px-8 md:py-28">
+  <section id="studio" data-section class="relative overflow-hidden px-6 py-20 md:px-12 md:py-28 lg:px-16">
     <div class="pointer-events-none absolute inset-x-0 top-1/3 h-[40%] bg-[radial-gradient(ellipse_at_center,rgba(159,232,208,0.1),transparent_68%)]" />
 
     <div class="mx-auto mb-12 grid max-w-7xl gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">

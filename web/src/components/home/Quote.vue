@@ -92,7 +92,7 @@ onUnmounted(() => {
       SUMMIT
     </p>
 
-    <div class="relative z-10 flex min-h-[100svh] flex-col justify-center px-4 py-24 md:px-8 md:py-28">
+    <div class="relative z-10 flex min-h-[100svh] flex-col justify-center px-6 py-24 md:px-12 md:py-28 lg:px-16">
       <div class="mx-auto w-full max-w-7xl text-center">
         <blockquote class="mx-auto max-w-6xl">
           <div ref="linesRef" class="space-y-3 md:space-y-4">
