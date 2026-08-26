@@ -51,8 +51,8 @@ function padWallRow(row: WallItem[], minCount = 8) {
 </script>
 
 <template>
-  <section id="wall" data-section class="flex w-full flex-col items-center justify-center px-8 py-20 md:px-16 md:py-28 lg:px-24">
-    <div class="mx-auto mb-12 flex w-full max-w-5xl flex-col items-center justify-center text-center lg:mb-16">
+  <section id="wall" data-section class="flex w-full flex-col items-center justify-center px-10 py-20 md:px-20 md:py-28 lg:px-28">
+    <div class="mx-auto mb-12 flex w-full max-w-[1380px] flex-col items-center justify-center text-center lg:mb-16">
       <h2 data-section-title class="w-full text-center text-balance text-4xl font-black leading-[1.1] tracking-[-0.06em] text-[#f5efe6] md:text-6xl lg:text-7xl">
         一些<em class="font-normal not-italic text-[#d7a35b]">留言</em>
       </h2>

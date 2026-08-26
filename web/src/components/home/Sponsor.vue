@@ -55,7 +55,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="sponsor"
     data-section
-    class="sponsor relative min-h-[100svh] overflow-hidden px-6 py-24 md:px-12 md:py-32 lg:px-16"
+    class="sponsor relative min-h-[100svh] overflow-hidden px-10 py-24 md:px-20 md:py-32 lg:px-28"
   >
     <div class="sponsor-aurora pointer-events-none absolute inset-0" />
     <div class="sponsor-grid pointer-events-none absolute inset-0 opacity-[0.18]" />
@@ -66,10 +66,10 @@ onUnmounted(() => {
       aria-hidden="true"
       class="sponsor-watermark pointer-events-none absolute left-1/2 top-[6%] z-0 -translate-x-1/2 select-none whitespace-nowrap font-black leading-none tracking-[-0.08em] text-[24vw] text-white/[0.045] md:top-[2%] md:text-[18vw]"
     >
-      FORWARD
+      SPONSOR
     </p>
 
-    <div class="relative z-10 mx-auto flex max-w-7xl flex-col items-center text-center">
+    <div class="relative z-10 mx-auto flex max-w-[1380px] flex-col items-center text-center">
       <p data-reveal class="mb-5 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#539dfd]">
         Exclusive Partners
       </p>

@@ -108,7 +108,7 @@ function openAt(index: number) {
     </p>
 
     <!-- 主标题 -->
-    <div class="photo-wall-copy relative z-30 mx-auto max-w-7xl px-10 md:absolute md:inset-x-0 md:top-10 md:px-20 lg:top-14 lg:px-32">
+    <div class="photo-wall-copy relative z-30 mx-auto max-w-[1380px] px-10 md:absolute md:inset-x-0 md:top-10 md:px-20 lg:top-14 lg:px-28">
       <h2
         data-section-title
         class="photo-wall-headline mt-4 max-w-3xl text-balance text-4xl font-black leading-[1.08] tracking-[-0.06em] text-white md:text-6xl lg:text-7xl"

@@ -241,7 +241,7 @@ onUnmounted(() => {
     <div class="grain pointer-events-none absolute inset-0 z-3 bg-size-[200px] bg-repeat opacity-[0.03]" />
 
     <!-- 标题头 -->
-    <header :class="['page-header pointer-events-none absolute left-[32px] md:left-[56px] lg:left-[64px] top-[34px] z-[100] transition-[transform,opacity] duration-500 ease-out', hintHidden ? 'translate-y-[-10px] scale-[0.92] opacity-40' : '']">
+    <header :class="['page-header pointer-events-none absolute left-[40px] md:left-[80px] lg:left-[112px] top-[34px] z-[100] transition-[transform,opacity] duration-500 ease-out', hintHidden ? 'translate-y-[-10px] scale-[0.92] opacity-40' : '']">
       <h1 class="font-bold tracking-[0.08em] text-[#f6efe3] text-[clamp(34px,5vw,68px)] [text-shadow:0_0_28px_rgba(232,160,48,0.22)]">🏆 里程碑</h1>
     </header>
 
