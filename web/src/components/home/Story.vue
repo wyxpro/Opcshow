@@ -160,7 +160,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="story"
     data-section
-    class="relative flex min-h-[100svh] items-center overflow-hidden px-8 py-20 md:px-16 md:py-24 lg:px-24"
+    class="relative flex min-h-[100svh] items-center overflow-hidden px-10 py-20 md:px-20 md:py-24 lg:px-28 xl:px-36"
   >
     <!-- 光亮色块遮罩 -->
     <div class="pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[80%] bg-[radial-gradient(ellipse_at_center,rgba(215,163,91,0.16),transparent_62%)]" />
@@ -176,7 +176,7 @@ onUnmounted(() => {
       </p>
     </div>
 
-    <div class="relative z-10 mx-auto w-full max-w-7xl">
+    <div class="relative z-10 mx-auto w-full max-w-[1360px]">
       <div class="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10 xl:gap-16">
         <!-- 段落切换内容 -->
         <div :class="reduceMotion ? 'relative space-y-12' : 'relative min-h-[220px] md:min-h-[280px] lg:min-h-[320px]'">

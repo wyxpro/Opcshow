@@ -47,8 +47,8 @@ const track = [...DESTINATIONS, ...DESTINATIONS]
       FREEDOM
     </p>
 
-    <div class="relative z-10 flex min-h-[100svh] flex-col justify-end px-8 pb-16 pt-32 md:px-16 md:pb-24 lg:px-24">
-      <div class="mx-auto w-full max-w-7xl">
+    <div class="relative z-10 flex min-h-[100svh] flex-col justify-end px-10 pb-16 pt-32 md:px-20 md:pb-24 lg:px-28 xl:px-36">
+      <div class="mx-auto w-full max-w-[1360px]">
         <h2
           data-section-title
           class="max-w-5xl text-balance text-5xl font-black leading-[1.05] tracking-[-0.06em] text-white md:text-7xl lg:text-[6.5rem]"
