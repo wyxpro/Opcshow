@@ -160,7 +160,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="story"
     data-section
-    class="relative flex min-h-[100svh] items-center overflow-hidden px-6 py-20 md:px-12 md:py-24 lg:px-16"
+    class="relative flex min-h-[100svh] items-center overflow-hidden px-8 py-20 md:px-16 md:py-24 lg:px-24"
   >
     <!-- 光亮色块遮罩 -->
     <div class="pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[80%] bg-[radial-gradient(ellipse_at_center,rgba(215,163,91,0.16),transparent_62%)]" />
@@ -183,7 +183,7 @@ onUnmounted(() => {
           <span
             v-if="!reduceMotion"
             aria-hidden="true"
-            class="pointer-events-none absolute bottom-2 left-0 top-2 hidden w-px overflow-hidden bg-white/10 md:block"
+            class="pointer-events-none absolute bottom-2 left-0 top-2 hidden w-px overflow-hidden bg-white/10 md:left-4 md:block"
           >
             <span
               ref="progressRef"
@@ -194,7 +194,7 @@ onUnmounted(() => {
           <!-- 01 -->
           <p
             :ref="(el) => (parasRef[0] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-8"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -208,7 +208,7 @@ onUnmounted(() => {
           <!-- 02 -->
           <p
             :ref="(el) => (parasRef[1] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-8"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -223,7 +223,7 @@ onUnmounted(() => {
           <!-- 03 -->
           <p
             :ref="(el) => (parasRef[2] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-8"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -237,7 +237,7 @@ onUnmounted(() => {
           <!-- 04 -->
           <p
             :ref="(el) => (parasRef[3] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-8"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">

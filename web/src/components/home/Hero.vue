@@ -12,10 +12,10 @@ const orbitTags = [
 </script>
 
 <template>
-  <section id="top" data-section class="relative min-h-screen flex items-center justify-center overflow-hidden px-6 pb-12 pt-28 md:px-12 md:pb-20 md:pt-36 lg:px-16 lg:pt-40">
+  <section id="top" data-section class="relative min-h-[100svh] flex flex-col justify-center items-center overflow-hidden px-8 py-16 md:px-16 lg:px-24">
     <Earth />
 
-    <div class="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+    <div class="relative z-10 mx-auto my-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
       <div>
         <p data-hero-meta class="mb-5 text-[11px] font-semibold uppercase tracking-[0.34em] text-[#539dfd]">
           一个平凡的人
@@ -93,7 +93,7 @@ const orbitTags = [
           <!-- 头像中心 -->
           <div data-orbit-avatar class="absolute z-10 h-[220px] w-[220px] cursor-pointer overflow-hidden rounded-full border border-white/12 bg-[#0b0f14] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out hover:scale-[1.04] md:h-[250px] md:w-[250px]">
             <div class="relative h-full w-full overflow-hidden rounded-full bg-white/5">
-              <img src="https://q.qlogo.cn/g?b=qq&nk=3311118881&s=640" alt="刘宇阳头像" class="h-full w-full object-cover object-center" />
+              <img src="https://q.qlogo.cn/g?b=qq&nk=3311118881&s=640" alt="晓叶有点酷头像" class="h-full w-full object-cover object-center" />
             </div>
             <span class="absolute bottom-5 right-5 h-4 w-4 rounded-full border-4 border-[#0b0f14] bg-[#63d47f]" />
           </div>

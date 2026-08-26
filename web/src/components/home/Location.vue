@@ -104,7 +104,7 @@ onUnmounted(() => {
     </div>
 
     <!-- 文案标题与经纬度 -->
-    <div class="relative z-10 flex min-h-[100svh] flex-col justify-end px-6 pb-32 pt-28 md:px-12 md:pb-44 lg:px-16 lg:pb-52">
+    <div class="relative z-10 flex min-h-[100svh] flex-col justify-center px-8 pb-48 pt-32 md:px-16 md:pb-64 lg:px-24 lg:pb-80">
       <div class="mx-auto w-full max-w-7xl">
         <h2
           data-section-title
