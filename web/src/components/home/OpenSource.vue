@@ -24,8 +24,8 @@ const VIDEO_SRC =
     <div class="pointer-events-none absolute -left-1/4 top-0 h-[55%] w-[70%] bg-[radial-gradient(ellipse_at_center,rgba(159,232,208,0.2),transparent_65%)]" />
     <div class="pointer-events-none absolute -right-1/5 bottom-1/5 h-[48%] w-[55%] bg-[radial-gradient(ellipse_at_center,rgba(215,163,91,0.14),transparent_68%)]" />
 
-    <div class="relative z-10 flex min-h-[100svh] flex-col justify-start px-10 pb-10 pt-[38.2svh] md:px-20 md:pb-14 lg:px-28 xl:px-36">
-      <div class="mx-auto w-full max-w-[1360px]">
+    <div class="relative z-10 flex min-h-[100svh] flex-col justify-start px-10 pb-10 pt-[38.2svh] md:px-20 md:pb-14 lg:px-32">
+      <div class="mx-auto w-full max-w-7xl">
         <h2
           data-section-title
           class="max-w-5xl text-balance text-5xl font-black leading-[1.05] tracking-[-0.06em] text-white md:text-7xl lg:text-[6.5rem]"

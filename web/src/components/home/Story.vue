@@ -160,7 +160,7 @@ onUnmounted(() => {
     ref="sectionRef"
     id="story"
     data-section
-    class="relative flex min-h-[100svh] items-center overflow-hidden px-10 py-20 md:px-20 md:py-24 lg:px-28 xl:px-36"
+    class="relative flex min-h-[100svh] items-center overflow-hidden px-10 py-20 md:px-20 md:py-24 lg:px-32"
   >
     <!-- 光亮色块遮罩 -->
     <div class="pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[80%] bg-[radial-gradient(ellipse_at_center,rgba(215,163,91,0.16),transparent_62%)]" />
@@ -176,14 +176,14 @@ onUnmounted(() => {
       </p>
     </div>
 
-    <div class="relative z-10 mx-auto w-full max-w-[1360px]">
+    <div class="relative z-10 mx-auto w-full max-w-7xl">
       <div class="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10 xl:gap-16">
         <!-- 段落切换内容 -->
         <div :class="reduceMotion ? 'relative space-y-12' : 'relative min-h-[220px] md:min-h-[280px] lg:min-h-[320px]'">
           <span
             v-if="!reduceMotion"
             aria-hidden="true"
-            class="pointer-events-none absolute bottom-2 left-0 top-2 hidden w-px overflow-hidden bg-white/10 md:left-4 md:block"
+            class="pointer-events-none absolute bottom-2 left-0 top-2 hidden w-px overflow-hidden bg-white/10 md:left-6 md:block"
           >
             <span
               ref="progressRef"
@@ -194,7 +194,7 @@ onUnmounted(() => {
           <!-- 01 -->
           <p
             :ref="(el) => (parasRef[0] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-16 lg:pl-20"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -208,7 +208,7 @@ onUnmounted(() => {
           <!-- 02 -->
           <p
             :ref="(el) => (parasRef[1] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-16 lg:pl-20"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -223,7 +223,7 @@ onUnmounted(() => {
           <!-- 03 -->
           <p
             :ref="(el) => (parasRef[2] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-16 lg:pl-20"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -237,7 +237,7 @@ onUnmounted(() => {
           <!-- 04 -->
           <p
             :ref="(el) => (parasRef[3] = el as HTMLElement)"
-            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-12 lg:pl-16"
+            class="story-para max-w-3xl pl-0 text-[clamp(1.4rem,2.7vw,2.4rem)] font-light leading-[1.4] tracking-[-0.02em] text-white/85 md:pl-16 lg:pl-20"
             :class="reduceMotion ? 'relative' : 'absolute inset-x-0 top-0'"
           >
             <span aria-hidden="true" class="mb-4 block font-mono text-[11px] font-semibold tracking-[0.28em] text-[#d7a35b]">
@@ -270,7 +270,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 底栏圆点进度条 -->
-      <div class="mt-10 flex items-center gap-4 md:mt-14">
+      <div class="mt-10 flex items-center gap-4 md:mt-14 md:pl-16 lg:pl-20">
         <div class="flex items-center gap-2" role="tablist">
           <button
             v-for="(word, index) in KEYWORDS"

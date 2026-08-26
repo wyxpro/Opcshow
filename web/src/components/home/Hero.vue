@@ -12,10 +12,10 @@ const orbitTags = [
 </script>
 
 <template>
-  <section id="top" data-section class="relative min-h-[100svh] flex flex-col justify-center items-center overflow-hidden px-10 py-20 md:px-20 md:py-28 lg:px-28 xl:px-36">
+  <section id="top" data-section class="relative min-h-[100svh] flex flex-col justify-start overflow-hidden px-10 pb-12 pt-20 md:px-20 md:pb-16 md:pt-28 lg:px-32 lg:pt-32">
     <Earth />
 
-    <div class="relative z-10 mx-auto my-auto grid w-full max-w-[1360px] items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+    <div class="relative z-10 mx-auto mt-2 grid w-full max-w-7xl items-start gap-10 md:mt-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
       <div>
         <p data-hero-meta class="mb-5 text-[11px] font-semibold uppercase tracking-[0.34em] text-[#539dfd]">
           一个平凡的人
