@@ -128,7 +128,7 @@ const tabbar = [
 <template>
   <div class="app-shell" :class="{ 'is-dark-shell': activeGroup === 'home' }">
     <!-- ======== PC 顶部导航栏 ======== -->
-    <header class="pc-topnav" :class="{ 'is-dark-nav': activeGroup === 'home' }">
+    <header v-if="activeGroup !== 'admin'" class="pc-topnav" :class="{ 'is-dark-nav': activeGroup === 'home' }">
       <div class="topnav-container" :class="{ 'is-dark-container': activeGroup === 'home' }">
         <!-- 品牌 / Logo -->
         <div class="brand" @click="go('/')">
@@ -196,7 +196,7 @@ const tabbar = [
     </header>
 
     <!-- ======== 移动端顶栏 ======== -->
-    <header class="mobile-top" :class="{ 'is-dark-nav': activeGroup === 'home' }">
+    <header v-if="activeGroup !== 'admin'" class="mobile-top" :class="{ 'is-dark-nav': activeGroup === 'home' }">
       <button class="hamburger" @click="mobileNavOpen = true" aria-label="菜单">
         <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
       </button>
@@ -230,7 +230,7 @@ const tabbar = [
     </transition>
 
     <!-- ======== 主内容 ======== -->
-    <main class="main-area" :class="{ 'is-home-main': activeGroup === 'home' }">
+    <main class="main-area" :class="{ 'is-home-main': activeGroup === 'home', 'is-admin-main': activeGroup === 'admin' }">
       <router-view v-slot="{ Component }">
         <transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -239,7 +239,7 @@ const tabbar = [
     </main>
 
     <!-- ======== 移动端底部 TabBar ======== -->
-    <nav class="tabbar">
+    <nav v-if="activeGroup !== 'admin'" class="tabbar">
       <a v-for="t in tabbar" :key="t.key" :class="{ on: activeGroup === t.key }" @click="go(t.path)">
         <svg viewBox="0 0 24 24"><path :d="t.icon" /></svg>
         <span>{{ t.label }}</span>
@@ -591,12 +591,20 @@ const tabbar = [
   background-color: #050608 !important;
 }
 
+.main-area.is-admin-main {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: #0B0E14 !important;
+}
+
 @media (max-width: 860px) {
   .pc-topnav { display: none; }
   .mobile-top { display: flex; }
   .tabbar { display: flex; }
   .main-area { padding-top: 66px !important; }
-  .main-area.is-home-main { padding-top: 0 !important; padding-left: 0 !important; padding-right: 0 !important; }
+  .main-area.is-home-main, .main-area.is-admin-main { padding-top: 0 !important; padding-left: 0 !important; padding-right: 0 !important; }
 }
 </style>
 
