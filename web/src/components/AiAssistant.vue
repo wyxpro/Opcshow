@@ -1,6 +1,7 @@
 <script setup lang="ts">
-/** 全局悬浮 AI 助手：创作 / 润色 / 答疑 / 简历优化 / 代码辅助 */
+/** 全局悬浮 AI 助手：创作 / 润色 / 答疑 / 简历优化 / 代码辅助 (支持 SSE 流式打字机 + Markdown 渲染) */
 import { nextTick, ref } from 'vue'
+import { marked } from 'marked'
 import { api } from '../api'
 import { store } from '../store'
 
@@ -22,12 +23,21 @@ const modes = [
   { id: 'code', name: '代码' },
 ]
 
+function renderMd(content: string): string {
+  if (!content) return ''
+  try {
+    return marked.parse(content) as string
+  } catch {
+    return content
+  }
+}
+
 function toggle() {
   open.value = !open.value
   if (open.value && msgs.value.length === 0) {
     msgs.value.push({
       role: 'ai',
-      text: store.settings.ai?.welcome || '你好，我是小舟助手。可以帮你创作文案、润色内容、优化简历、解答知识库问题。',
+      text: store.settings.ai?.welcome || '你好，我是小舟助手。我支持 SSE 流式对话、文案创作、知识库答疑与简历优化。',
     })
   }
 }
@@ -40,19 +50,36 @@ async function scrollBottom() {
 async function send() {
   const text = input.value.trim()
   if (!text || loading.value) return
+
   msgs.value.push({ role: 'user', text, mode: mode.value })
   input.value = ''
   loading.value = true
+
+  // 创建一条空白 AI 消息，准备追加流数据
+  const aiMsgIndex = msgs.value.length
+  msgs.value.push({ role: 'ai', text: '' })
   scrollBottom()
-  try {
-    const res = await api.post('/ai/chat', { message: text, mode: mode.value })
-    msgs.value.push({ role: 'ai', text: res.reply })
-  } catch (e: any) {
-    msgs.value.push({ role: 'ai', text: `服务暂时不可用：${e.message}` })
-  } finally {
-    loading.value = false
-    scrollBottom()
-  }
+
+  await api.stream(
+    '/ai/stream',
+    { message: text, mode: mode.value },
+    (chunkText: string) => {
+      // 收到 chunk 时推流更新消息内容并自动滚动
+      msgs.value[aiMsgIndex].text += chunkText
+      scrollBottom()
+    },
+    (err: Error) => {
+      if (!msgs.value[aiMsgIndex].text) {
+        msgs.value[aiMsgIndex].text = `服务响应异常：${err.message}`
+      }
+      loading.value = false
+      scrollBottom()
+    },
+    () => {
+      loading.value = false
+      scrollBottom()
+    }
+  )
 }
 
 function quick(prompt: string) {
@@ -83,7 +110,7 @@ function copy(text: string) {
         <div class="ai-title">
           <span class="ai-dot"></span>
           <strong>小舟助手</strong>
-          <small>AI · 随时待命</small>
+          <small>AI SSE 流式 · 随时待命</small>
         </div>
         <button class="icon-btn" @click="open = false">
           <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
@@ -98,9 +125,11 @@ function copy(text: string) {
 
       <div ref="listRef" class="ai-list">
         <div v-for="(m, i) in msgs" :key="i" class="ai-msg" :class="m.role">
-          <div class="bubble" @dblclick="copy(m.text)">{{ m.text }}</div>
+          <!-- AI 消息采用 Markdown 解析渲染，用户消息渲染纯文本 -->
+          <div v-if="m.role === 'ai'" class="bubble md-content" @dblclick="copy(m.text)" v-html="renderMd(m.text)"></div>
+          <div v-else class="bubble" @dblclick="copy(m.text)">{{ m.text }}</div>
         </div>
-        <div v-if="loading" class="ai-msg ai">
+        <div v-if="loading && (!msgs.length || !msgs[msgs.length - 1].text)" class="ai-msg ai">
           <div class="bubble typing"><i></i><i></i><i></i></div>
         </div>
       </div>
@@ -142,7 +171,7 @@ function copy(text: string) {
 
 .ai-panel {
   position: fixed; right: 26px; bottom: 94px; z-index: 150;
-  width: 380px; max-width: calc(100vw - 32px); height: 560px; max-height: 72vh;
+  width: 420px; max-width: calc(100vw - 32px); height: 580px; max-height: 75vh;
   display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-lg); border-radius: 20px;
 }
@@ -167,7 +196,7 @@ function copy(text: string) {
 .ai-msg { display: flex; }
 .ai-msg.user { justify-content: flex-end; }
 .bubble {
-  max-width: 82%; padding: 9px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.65;
+  max-width: 88%; padding: 9px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.65;
   white-space: pre-wrap; word-break: break-word;
   background: var(--surface-2); border: 1px solid var(--line-2); color: var(--ink);
   border-bottom-left-radius: 4px;
@@ -176,6 +205,21 @@ function copy(text: string) {
   background: var(--accent); border-color: transparent; color: #FFF6EF;
   border-radius: 14px; border-bottom-right-radius: 4px;
 }
+
+/* Markdown 内联样式与代码块排版 */
+.bubble.md-content { white-space: normal; }
+.bubble.md-content :deep(p) { margin: 0 0 8px 0; }
+.bubble.md-content :deep(p:last-child) { margin-bottom: 0; }
+.bubble.md-content :deep(ul), .bubble.md-content :deep(ol) { margin: 4px 0 8px 18px; padding: 0; }
+.bubble.md-content :deep(li) { margin-bottom: 3px; }
+.bubble.md-content :deep(code) {
+  background: rgba(0, 0, 0, 0.06); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12.5px;
+}
+.bubble.md-content :deep(pre) {
+  background: #1e1e2e; color: #f8f8f2; padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0;
+}
+.bubble.md-content :deep(pre code) { background: transparent; padding: 0; color: inherit; }
+
 .bubble.typing { display: flex; gap: 5px; padding: 13px 16px; }
 .bubble.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bounce 1s infinite; }
 .bubble.typing i:nth-child(2) { animation-delay: .15s }

@@ -23,6 +23,9 @@ async function req(path: string, options: RequestInit = {}): Promise<any> {
   if (!res.ok) {
     let detail = `请求失败 (${res.status})`
     try { detail = (await res.json()).detail || detail } catch { /* ignore */ }
+    if (res.status === 401) {
+      setToken('')
+    }
     const err: any = new Error(detail)
     err.status = res.status
     throw err
@@ -30,11 +33,72 @@ async function req(path: string, options: RequestInit = {}): Promise<any> {
   return res.json()
 }
 
+export async function streamReq(
+  path: string,
+  body: any,
+  onChunk: (text: string) => void,
+  onError?: (err: Error) => void,
+  onDone?: () => void
+) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token()) headers['Authorization'] = `Bearer ${token()}`
+  try {
+    const res = await fetch(BASE + path, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body || {}),
+    })
+
+    if (!res.ok) {
+      let detail = `流请求失败 (${res.status})`
+      try { detail = (await res.json()).detail || detail } catch { /* ignore */ }
+      if (res.status === 401) setToken('')
+      throw new Error(detail)
+    }
+
+    const reader = res.body?.getReader()
+    const decoder = new TextDecoder('utf-8')
+    if (!reader) throw new Error('流数据不可读')
+
+    let buffer = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed.startsWith('data: ')) {
+          const dataStr = trimmed.removeprefix ? trimmed.removeprefix('data: ') : trimmed.slice(6)
+          if (dataStr === '[DONE]') {
+            if (onDone) onDone()
+            return
+          }
+          try {
+            const parsed = JSON.parse(dataStr)
+            if (parsed.text) {
+              onChunk(parsed.text)
+            }
+          } catch {
+            // ignore non-json chunk
+          }
+        }
+      }
+    }
+    if (onDone) onDone()
+  } catch (err: any) {
+    if (onError) onError(err)
+  }
+}
+
 export const api = {
   get: (p: string) => req(p),
   post: (p: string, body?: any) => req(p, { method: 'POST', body: JSON.stringify(body ?? {}) }),
   put: (p: string, body?: any) => req(p, { method: 'PUT', body: JSON.stringify(body ?? {}) }),
   del: (p: string) => req(p, { method: 'DELETE' }),
+  stream: streamReq,
 }
 
 /* ---------- 类型定义（与后端数据格式一一对应） ---------- */

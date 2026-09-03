@@ -1,10 +1,15 @@
 """AI 服务域：内容创作、文案润色、知识答疑、简历优化、代码辅助。
-当前为本地规则引擎演示实现；生产环境在 _call_llm() 中替换为大模型 API（OpenAI 兼容协议）。
+支持真实接入 OpenAI 兼容 REST 大模型 API 与 SSE (Server-Sent Events) 流式打字机响应。
 """
+import asyncio
+import json
+import os
 import re
 import time
+from typing import AsyncGenerator
 
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -14,15 +19,6 @@ class ChatIn(BaseModel):
     message: str
     mode: str = "chat"  # create / polish / qa / resume / code / chat
     context: str = ""
-
-
-def _call_llm(prompt: str, system: str = "") -> str | None:
-    """对接大模型的统一入口（预留）：
-    - 使用 OpenAI 兼容协议 POST {base_url}/chat/completions
-    - 从环境变量 OPC_LLM_KEY / OPC_LLM_BASE / OPC_LLM_MODEL 读取配置
-    未配置时返回 None，走本地规则引擎。
-    """
-    return None
 
 
 def polish_text(text: str) -> str:
@@ -51,7 +47,7 @@ def generate(mode: str, message: str) -> str:
     if mode == "resume":
         return (f"已按「STAR 法则」优化你的描述：\n\n"
                 f"▸ 原表述：{msg[:50]}{'…' if len(msg) > 50 else ''}\n\n"
-                f"▸ 优化后：主导{msg[:30]}相关工作，通过量化手段拆解目标，"
+                f"▸ 优化后：主导 {msg[:30]} 相关工作，通过量化手段拆解目标，"
                 f"最终推动核心指标显著提升（建议补充具体数据，如「性能提升 40%」）。\n\n"
                 f"▸ 建议：\n1. 每段经历以动词开头（主导/设计/落地）\n"
                 f"2. 用数字替代形容词\n3. 与目标岗位 JD 关键词对齐")
@@ -75,13 +71,90 @@ def generate(mode: str, message: str) -> str:
             f"切换上方模式即可体验。")
 
 
+async def _call_llm_stream(prompt: str, mode: str = "chat") -> AsyncGenerator[str, None]:
+    """真实 LLM / 本地降级 SSE 流式生成器"""
+    api_key = os.environ.get("OPC_LLM_KEY")
+    api_base = os.environ.get("OPC_LLM_BASE", "https://api.deepseek.com/v1").rstrip("/")
+    api_model = os.environ.get("OPC_LLM_MODEL", "deepseek-chat")
+
+    system_prompt = "你是小舟助手，一位精通技术与创作的智能个人助理。"
+    if mode == "polish":
+        system_prompt = "你是专业的文案润色大师，精简冗余表达，强化动词，统一专业语气。"
+    elif mode == "resume":
+        system_prompt = "你是资深 HR 与职业顾问，使用 STAR 法则结构化优化简历描述。"
+    elif mode == "code":
+        system_prompt = "你是资深全栈工程师，提供清晰带注释的高质量代码与解释。"
+
+    if api_key:
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.send(
+                    client.build_request(
+                        "POST",
+                        f"{api_base}/chat/completions",
+                        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                        json={
+                            "model": api_model,
+                            "messages": [
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": prompt}
+                            ],
+                            "stream": True,
+                            "temperature": 0.7,
+                        }
+                    ),
+                    stream=True
+                )
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        data_str = line.removeprefix("data: ").strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            payload = json.loads(data_str)
+                            chunk = payload.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                            if chunk:
+                                yield f"data: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+                        except Exception:
+                            continue
+            yield "data: [DONE]\n\n"
+            return
+        except Exception as e:
+            # 大模型调用出错时输出降级提示
+            yield f"data: {json.dumps({'text': f'\\n\\n*(大模型调用异常: {str(e)}，已降级为规则引擎响应)*\\n\\n'}, ensure_ascii=False)}\n\n"
+
+    # 本地规则引擎降级打字机推流
+    full_text = generate(mode, prompt)
+    # 按小数据块逐字/逐词推送，模拟极佳打字机动画
+    step = 2
+    for i in range(0, len(full_text), step):
+        chunk = full_text[i:i + step]
+        yield f"data: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        await asyncio.sleep(0.015)
+
+    yield "data: [DONE]\n\n"
+
+
 @router.post("/chat")
 def chat(body: ChatIn):
     t0 = time.time()
-    llm = _call_llm(body.message)
-    reply = llm if llm else generate(body.mode, body.message)
-    return {"reply": reply, "mode": body.mode,
-            "latency": round((time.time() - t0) * 1000), "engine": "llm" if llm else "local"}
+    reply = generate(body.mode, body.message)
+    return {
+        "reply": reply,
+        "mode": body.mode,
+        "latency": round((time.time() - t0) * 1000),
+        "engine": "local"
+    }
+
+
+@router.post("/stream")
+async def chat_stream(body: ChatIn):
+    """SSE 流式 AI 聊天响应接口"""
+    return StreamingResponse(
+        _call_llm_stream(body.message, body.mode),
+        media_type="text/event-stream"
+    )
 
 
 @router.get("/capabilities")

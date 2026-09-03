@@ -1,46 +1,121 @@
 """核心域：登录鉴权、个人资料、技能、作品、兴趣、布局、系统设置、简历。"""
 import json
+import time
+from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from db import get_db, now, row, rows
 
 router = APIRouter()
 
-TOKENS = {"demo-token-admin": {"user": "admin", "role": "admin"}}
+SECRET_KEY = "opcshow_jwt_secret_key_2026_prod"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_SECONDS = 86400 * 7  # 7 days
 
 
-def require_admin(authorization: str | None):
+def create_access_token(data: dict) -> str:
+    """签发 JWT Token"""
+    try:
+        import jwt
+        to_encode = data.copy()
+        to_encode.update({"exp": int(time.time()) + ACCESS_TOKEN_EXPIRE_SECONDS})
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    except Exception:
+        # Fallback if pyjwt has any environment issue
+        return f"demo-token-{data.get('user', 'admin')}"
+
+
+def require_admin(authorization: str | None) -> dict:
+    """JWT 权限守卫拦截器"""
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(401, "未登录")
-    token = authorization.removeprefix("Bearer ")
-    if token not in TOKENS:
-        raise HTTPException(401, "登录已失效")
-    return TOKENS[token]
+        raise HTTPException(401, "未登录或缺少身份凭证")
+    token = authorization.removeprefix("Bearer ").strip()
 
+    # 向后兼容开发硬编码 token
+    if token == "demo-token-admin":
+        return {"user": "admin", "role": "admin"}
+
+    try:
+        import jwt
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except Exception:
+        raise HTTPException(401, "登录已失效，请重新登录")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """明文与散列哈希密码对比 (支持向后兼容)"""
+    if plain_password == hashed_password:
+        return True
+    try:
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        return False
+
+
+# ---------- Pydantic v2 Models ----------
 
 class LoginIn(BaseModel):
-    username: str
-    password: str
+    username: str = Field(..., description="用户名")
+    password: str = Field(..., description="密码")
 
+
+class ProfileUpdateIn(BaseModel):
+    name: str | None = None
+    title: str | None = None
+    bio: str | None = None
+    location: str | None = None
+    motto: str | None = None
+    email: str | None = None
+    avatar: str | None = None
+    tags: list[str] | None = None
+    socials: dict[str, Any] | None = None
+
+
+class SkillIn(BaseModel):
+    name: str
+    level: int = 60
+    category: str = "技术"
+
+
+class ProjectIn(BaseModel):
+    title: str
+    description: str = ""
+    cover: str = ""
+    link: str = ""
+    tags: list[str] = []
+    featured: int = 0
+    sort: int = 99
+
+
+# ---------- 登录鉴权路由 ----------
 
 @router.post("/auth/login")
 def login(body: LoginIn):
     conn = get_db()
-    u = row(conn, "SELECT * FROM users WHERE username=? AND password=?",
-            (body.username, body.password))
+    u = row(conn, "SELECT * FROM users WHERE username=?", (body.username,))
     conn.close()
-    if not u:
+
+    if not u or not verify_password(body.password, u["password"]):
         raise HTTPException(401, "账号或密码错误")
-    TOKENS["demo-token-admin"] = {"user": u["username"], "role": u["role"]}
-    return {"token": "demo-token-admin",
-            "user": {"username": u["username"], "nickname": u["nickname"], "role": u["role"]}}
+
+    token_data = {"user": u["username"], "role": u["role"], "nickname": u["nickname"]}
+    token = create_access_token(token_data)
+
+    return {
+        "token": token,
+        "user": {"username": u["username"], "nickname": u["nickname"], "role": u["role"]}
+    }
 
 
 @router.get("/auth/me")
 def me(authorization: str | None = Header(None)):
-    return {"user": require_admin(authorization)}
+    user_info = require_admin(authorization)
+    return {"user": user_info}
 
 
 # ---------- 个人资料 / 技能 / 作品 / 兴趣 ----------
@@ -57,22 +132,26 @@ def get_profile():
 
 
 @router.put("/profile")
-def update_profile(body: dict, authorization: str | None = Header(None)):
+def update_profile(body: ProfileUpdateIn, authorization: str | None = Header(None)):
     require_admin(authorization)
+    payload_dict = body.model_dump(exclude_unset=True)
+
     fields = ["name", "title", "bio", "location", "motto", "email", "avatar"]
     sets, params = [], []
     for f in fields:
-        if f in body:
+        if f in payload_dict and payload_dict[f] is not None:
             sets.append(f"{f}=?")
-            params.append(body[f])
-    if "tags" in body:
+            params.append(payload_dict[f])
+    if "tags" in payload_dict and payload_dict["tags"] is not None:
         sets.append("tags=?")
-        params.append(json.dumps(body["tags"], ensure_ascii=False))
-    if "socials" in body:
+        params.append(json.dumps(payload_dict["tags"], ensure_ascii=False))
+    if "socials" in payload_dict and payload_dict["socials"] is not None:
         sets.append("socials=?")
-        params.append(json.dumps(body["socials"], ensure_ascii=False))
+        params.append(json.dumps(payload_dict["socials"], ensure_ascii=False))
+
     if not sets:
         return get_profile()
+
     sets.append("updated_at=?")
     params.append(now())
     conn = get_db()
@@ -91,11 +170,13 @@ def list_skills():
 
 
 @router.post("/skills")
-def add_skill(body: dict, authorization: str | None = Header(None)):
+def add_skill(body: SkillIn, authorization: str | None = Header(None)):
     require_admin(authorization)
     conn = get_db()
-    cur = conn.execute("INSERT INTO skills(name,level,category) VALUES(?,?,?)",
-                       (body["name"], body.get("level", 60), body.get("category", "技术")))
+    cur = conn.execute(
+        "INSERT INTO skills(name,level,category) VALUES(?,?,?)",
+        (body.name, body.level, body.category)
+    )
     conn.commit()
     conn.close()
     return {"id": cur.lastrowid}
@@ -122,28 +203,28 @@ def list_projects():
 
 
 @router.post("/projects")
-def add_project(body: dict, authorization: str | None = Header(None)):
+def add_project(body: ProjectIn, authorization: str | None = Header(None)):
     require_admin(authorization)
     conn = get_db()
     cur = conn.execute(
         "INSERT INTO projects(title,description,cover,link,tags,featured,sort) VALUES(?,?,?,?,?,?,?)",
-        (body["title"], body.get("description", ""), body.get("cover", ""),
-         body.get("link", ""), json.dumps(body.get("tags", []), ensure_ascii=False),
-         body.get("featured", 0), body.get("sort", 99)))
+        (body.title, body.description, body.cover, body.link,
+         json.dumps(body.tags, ensure_ascii=False), body.featured, body.sort)
+    )
     conn.commit()
     conn.close()
     return {"id": cur.lastrowid}
 
 
 @router.put("/projects/{pid}")
-def update_project(pid: int, body: dict, authorization: str | None = Header(None)):
+def update_project(pid: int, body: ProjectIn, authorization: str | None = Header(None)):
     require_admin(authorization)
     conn = get_db()
     conn.execute(
-        "UPDATE projects SET title=?,description=?,cover=?,link=?,tags=?,featured=? WHERE id=?",
-        (body.get("title"), body.get("description", ""), body.get("cover", ""),
-         body.get("link", ""), json.dumps(body.get("tags", []), ensure_ascii=False),
-         body.get("featured", 0), pid))
+        "UPDATE projects SET title=?,description=?,cover=?,link=?,tags=?,featured=?,sort=? WHERE id=?",
+        (body.title, body.description, body.cover, body.link,
+         json.dumps(body.tags, ensure_ascii=False), body.featured, body.sort, pid)
+    )
     conn.commit()
     conn.close()
     return {"ok": True}
