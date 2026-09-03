@@ -2,15 +2,28 @@
 启动：uvicorn main:app --host 0.0.0.0 --port 8000
 接口统一前缀 /api，返回 JSON，错误使用 HTTPException(detail=...)。
 """
+import os
 import time
 from collections import defaultdict
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from loguru import logger
 
 from db import init_db
 from routers import admin, ai, core, fun, knowledge, life, social
+
+# 配置 Loguru 结构化按天切割日志
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+logger.add(
+    os.path.join(LOG_DIR, "opcshow_{time:YYYY-MM-DD}.log"),
+    rotation="00:00",
+    retention="10 days",
+    level="INFO",
+    encoding="utf-8"
+)
 
 app = FastAPI(title="Opcshow API", version="1.0.0", docs_url="/api/docs")
 
@@ -22,22 +35,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------- 简易轻量级 IP 限流防护 (Rate Limiter) ----------
+# ---------- 简易轻量级 IP 限流与日志防护 (Rate Limiter & Logger) ----------
 IP_REQUESTS: dict[str, list[float]] = defaultdict(list)
 RATE_LIMIT_PATHS = {"/api/ai/chat", "/api/ai/stream", "/api/auth/login"}
 MAX_REQUESTS_PER_MINUTE = 60
 
 
 @app.middleware("http")
-async def rate_limit_middleware(request: Request, call_next):
+async def rate_limit_and_log_middleware(request: Request, call_next):
+    start_time = time.time()
     path = request.url.path
+    client_ip = request.client.host if request.client else "127.0.0.1"
+
     if path in RATE_LIMIT_PATHS:
-        client_ip = request.client.host if request.client else "127.0.0.1"
         now_ts = time.time()
-        # 清理 60 秒前的历史记录
         IP_REQUESTS[client_ip] = [ts for ts in IP_REQUESTS[client_ip] if now_ts - ts < 60]
 
         if len(IP_REQUESTS[client_ip]) >= MAX_REQUESTS_PER_MINUTE:
+            logger.warning(f"Rate limit hit for IP: {client_ip} on path: {path}")
             return JSONResponse(
                 status_code=429,
                 content={"detail": "请求过于频繁，请稍后再试 (Rate limit exceeded)"}
@@ -45,6 +60,8 @@ async def rate_limit_middleware(request: Request, call_next):
         IP_REQUESTS[client_ip].append(now_ts)
 
     response = await call_next(request)
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+    logger.info(f"{request.method} {path} -> {response.status_code} [{duration_ms}ms] - IP: {client_ip}")
     return response
 
 
@@ -59,17 +76,20 @@ app.include_router(ai.router, prefix="/api/ai", tags=["AI"])
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.warning(f"HTTPException {exc.status_code} on {request.url.path}: {exc.detail}")
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
 @app.exception_handler(Exception)
 async def on_error(request: Request, exc: Exception):
+    logger.error(f"Unhandled Server Error on {request.url.path}: {str(exc)}")
     return JSONResponse(status_code=500, content={"detail": str(exc)})
 
 
 @app.on_event("startup")
 def startup():
     init_db()
+    logger.info("Opcshow API Server started successfully.")
 
 
 @app.get("/api/health")

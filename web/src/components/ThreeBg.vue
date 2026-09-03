@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 3D 动态背景（Three.js）：暖色粒子流 + 鼠标视差 + 触摸支持；遵循系统减弱动态偏好 */
+/** 3D 动态背景（Three.js）：暖色粒子流 + 鼠标视差；适配移动端低配降级 */
 import * as THREE from 'three'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -15,21 +15,27 @@ onMounted(() => {
   const el = wrap.value
   const w = el.clientWidth, h = el.clientHeight
 
+  // 低配 / 移动端设备自动降级检测
+  const isMobile = window.innerWidth < 768 || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4)
+  const pixelRatioCap = isMobile ? 1.0 : Math.min(devicePixelRatio, 2)
+
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100)
   camera.position.z = 8
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+  renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true })
+  renderer.setPixelRatio(pixelRatioCap)
   renderer.setSize(w, h)
   el.appendChild(renderer.domElement)
 
-  // 暖色粒子云
-  const count = Math.floor(420 * props.intensity) + 120
+  // 粒子数量适配（移动端减半）
+  const baseCount = isMobile ? 200 : 420
+  const count = Math.floor(baseCount * props.intensity) + 80
   const geo = new THREE.BufferGeometry()
   const pos = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
   const palette = [new THREE.Color('#E4572E'), new THREE.Color('#D9932C'), new THREE.Color('#3D7A5E'), new THREE.Color('#C9BFA9')]
+
   for (let i = 0; i < count; i++) {
     pos[i * 3] = (Math.random() - 0.5) * 22
     pos[i * 3 + 1] = (Math.random() - 0.5) * 12
@@ -39,7 +45,7 @@ onMounted(() => {
   }
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
   geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-  const mat = new THREE.PointsMaterial({ size: 0.07, vertexColors: true, transparent: true, opacity: 0.75 })
+  const mat = new THREE.PointsMaterial({ size: isMobile ? 0.09 : 0.07, vertexColors: true, transparent: true, opacity: 0.75 })
   const points = new THREE.Points(geo, mat)
   scene.add(points)
 
@@ -71,16 +77,22 @@ onMounted(() => {
   }
   tick()
 
+  let resizeTimer: any = null
   const ro = new ResizeObserver(() => {
-    const w2 = el.clientWidth, h2 = el.clientHeight
-    camera.aspect = w2 / h2
-    camera.updateProjectionMatrix()
-    renderer!.setSize(w2, h2)
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
+      if (!wrap.value || !renderer) return
+      const w2 = wrap.value.clientWidth, h2 = wrap.value.clientHeight
+      camera.aspect = w2 / h2
+      camera.updateProjectionMatrix()
+      renderer.setSize(w2, h2)
+    }, 60)
   })
   ro.observe(el)
 
   cleanup = () => {
     cancelAnimationFrame(raf)
+    clearTimeout(resizeTimer)
     ro.disconnect()
     el.removeEventListener('pointermove', onMove)
     geo.dispose(); mat.dispose(); renderer?.dispose()

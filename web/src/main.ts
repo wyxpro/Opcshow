@@ -1,11 +1,20 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import router from './router'
 import './styles/main.css'
 import './styles/liuyuyang.css'
 import { api } from './api'
 
-// 访问统计（PRD：后台数据统计）
+const app = createApp(App)
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+app.use(pinia)
+app.use(router)
+
+// 访问统计
 api.post('/visit', {}).catch(() => {})
 
-createApp(App).use(router).mount('#app')
+app.mount('#app')
